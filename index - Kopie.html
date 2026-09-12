@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d0e10">
+  <title>TKL Nova-X Configurator</title>
+  <style>
+    :root { --bg:#0d0e10; --panel:#15171b; --edge:#2d3037; --text:#edf1f4; --muted:#9aa3ad; --accent:#3ef2a6; --accent-dark:#123d2e; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 85% 0,#153e30 0,transparent 34%),var(--bg); color:var(--text); font:14px ui-monospace,SFMono-Regular,Consolas,monospace; }
+    main { width:min(900px,calc(100% - 32px)); margin:46px auto; }
+    header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--edge); padding-bottom:20px; margin-bottom:24px; }
+    h1 { margin:0; font-size:21px; letter-spacing:-.7px; } .brand { color:var(--accent); font-size:12px; }
+    .card { background:linear-gradient(145deg,rgba(27,30,35,.96),rgba(18,20,24,.96)); border:1px solid var(--edge); border-radius:10px; padding:22px; box-shadow:0 18px 45px rgba(0,0,0,.22); }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; } .wide { grid-column:1/-1; }
+    label, legend { color:var(--muted); display:block; font-size:12px; margin-bottom:7px; }
+    select, input { width:100%; background:#0d0f12; border:1px solid #383c43; border-radius:5px; padding:11px; color:var(--text); font:inherit; }
+    select:focus, input:focus { outline:1px solid var(--accent); border-color:var(--accent); }
+    fieldset { padding:0; margin:25px 0 0; border:0; } legend { color:var(--text); font-size:14px; margin-bottom:14px; }
+    .note { color:var(--muted); line-height:1.5; margin:22px 0 0; font-size:12px; }
+    .actions { display:flex; gap:12px; margin-top:24px; } button { border:1px solid var(--accent); background:var(--accent); color:#052217; padding:11px 16px; border-radius:5px; font:inherit; font-weight:700; cursor:pointer; } button.secondary { background:transparent; color:var(--accent); }
+    #result { display:none; white-space:pre-wrap; background:#0b0c0e; border:1px solid var(--edge); color:#bfffe0; margin-top:18px; padding:14px; border-radius:5px; }
+    @media(max-width:620px) { main { margin:24px auto; } header { align-items:flex-start; gap:8px; flex-direction:column; } .grid { grid-template-columns:1fr; } .wide { grid-column:auto; } .actions { flex-direction:column; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1>TKL Nova-X <span class="brand">CONFIGURATOR</span></h1><span class="brand">github.com/TikolonDev</span></header>
+    <section class="card">
+      <div class="grid">
+        <div><label for="board">Board</label><select id="board"><option value="bw16">BW16</option><option value="esp32c5">ESP32-C5</option></select></div>
+        <div><label for="design">Design</label><select id="design"><option>TKL Custom</option></select></div>
+      </div>
+      <fieldset><legend>Button Pinout</legend><div class="grid">
+        <div><label for="up">BTN_UP</label><select id="up"></select></div><div><label for="down">BTN_DOWN</label><select id="down"></select></div>
+        <div><label for="ok">BTN_OK</label><select id="ok"></select></div><div><label for="back">BTN_BACK</label><select id="back"></select></div>
+      </div></fieldset>
+      <fieldset><legend>Screen (I²C) Pinout</legend><div class="grid">
+        <div><label for="sda">SDA</label><select id="sda"></select></div><div><label for="scl">SCL</label><select id="scl"></select></div>
+      </div></fieldset>
+      <p class="note" id="info"></p>
+      <div class="actions"><button id="export">Konfiguration herunterladen</button><button id="copy" class="secondary">JSON kopieren</button></div>
+      <pre id="result"></pre>
+    </section>
+  </main>
+  <script>
+    const profiles = {
+      bw16: { label:'BW16', info:'Button-Voreinstellung aus Button.h. I²C verwendet die Board-Pins (im Projekt nicht explizit festgelegt).', pins:['D0 / PA0','D2 / PA27','D6 / PB3','D7 / PA25','D8 / PA26','D11 / PA13','D12 / PA12'], defaults:{up:'D12 / PA12',down:'D2 / PA27',ok:'D11 / PA13',back:'D6 / PB3',sda:'D8 / PA26',scl:'D7 / PA25'} },
+      esp32c5: { label:'ESP32-C5', info:'Voreinstellung direkt aus globals.h.', pins:['GPIO 10','GPIO 23','GPIO 24','GPIO 25','GPIO 26','GPIO 28'], defaults:{up:'GPIO 24',down:'GPIO 23',ok:'GPIO 28',back:'GPIO 10',sda:'GPIO 26',scl:'GPIO 25'} }
+    };
+    const ids=['up','down','ok','back','sda','scl'];
+    const $=id=>document.getElementById(id);
+    function populate(){ const p=profiles[$('board').value]; ids.forEach(id=>{ $(id).innerHTML=p.pins.map(pin=>`<option ${pin===p.defaults[id]?'selected':''}>${pin}</option>`).join(''); }); $('info').textContent=p.info; show(false); }
+    function config(){ const p=profiles[$('board').value]; return {board:p.label,design:$('design').value,pins:{btn_up:$('up').value,btn_down:$('down').value,btn_ok:$('ok').value,btn_back:$('back').value,i2c_sda:$('sda').value,i2c_scl:$('scl').value}}; }
+    function show(visible=true){ const text=JSON.stringify(config(),null,2); $('result').textContent=text; $('result').style.display=visible?'block':'none'; return text; }
+    $('board').addEventListener('change',populate);
+    $('copy').addEventListener('click',async()=>{ await navigator.clipboard.writeText(show()); $('copy').textContent='Kopiert'; setTimeout(()=>$('copy').textContent='JSON kopieren',1200); });
+    $('export').addEventListener('click',()=>{ const blob=new Blob([show()],{type:'application/json'}); const link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='tkl-novax-config.json'; link.click(); URL.revokeObjectURL(link.href); });
+    populate();
+  </script>
+</body>
+</html>
