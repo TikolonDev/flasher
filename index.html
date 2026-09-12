@@ -46,7 +46,7 @@
   </main>
   <script>
     const profiles = {
-      bw16: { label:'BW16', info:'Button default settings from `Button.h`. I²C uses the default board pins (not explicitly defined in the project).', pins:['D0 / PA0','D2 / PA27','D6 / PB3','D7 / PA25','D8 / PA26','D11 / PA13','D12 / PA12'], defaults:{up:'D12 / PA12',down:'D2 / PA27',ok:'D11 / PA13',back:'D6 / PB3',sda:'D8 / PA26',scl:'D7 / PA25'} },
+      bw16: { label:'BW16', info:'Button default settings from `Button.h`. I²C uses the default board pins.', pins:['D0 / PA0','D2 / PA27','D6 / PB3','D7 / PA25','D8 / PA26','D11 / PA13','D12 / PA12'], defaults:{up:'D12 / PA12',down:'D2 / PA27',ok:'D11 / PA13',back:'D6 / PB3',sda:'D8 / PA26',scl:'D7 / PA25'} },
       esp32c5: { label:'ESP32-C5', info:'Voreinstellung direkt aus globals.h.', pins:['GPIO 10','GPIO 23','GPIO 24','GPIO 25','GPIO 26','GPIO 28'], defaults:{up:'GPIO 24',down:'GPIO 23',ok:'GPIO 28',back:'GPIO 10',sda:'GPIO 26',scl:'GPIO 25'} }
     };
     const ids=['up','down','ok','back','sda','scl'];
