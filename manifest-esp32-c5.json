@@ -1,0 +1,13 @@
+{
+  "name": "TKL Nova-X ESP32-C5",
+  "version": "2026.09.13",
+  "new_install_prompt_erase": false,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C5",
+      "parts": [
+        { "path": "firmware/esp32-c5.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

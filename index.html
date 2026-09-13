@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d0e10">
+  <title>TKL Nova-X Firmware Flasher</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    :root { --bg:#0d0e10; --panel:#15171b; --edge:#2d3037; --text:#edf1f4; --muted:#a9b1bb; --accent:#3ef2a6; --accent-dark:#123d2e; --warning:#ffc86b; }
+    * { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--text); background:radial-gradient(circle at 86% 0,#153e30 0,transparent 34%),var(--bg); font:15px ui-monospace,SFMono-Regular,Consolas,monospace; }
+    main { width:min(920px,calc(100% - 32px)); margin:46px auto; } header { display:flex; justify-content:space-between; gap:16px; align-items:center; border-bottom:1px solid var(--edge); padding-bottom:20px; margin-bottom:24px; }
+    h1 { margin:0; font-size:22px; letter-spacing:-.7px; } h2 { font-size:16px; margin:0 0 12px; } .brand { color:var(--accent); font-size:12px; } .card { background:linear-gradient(145deg,rgba(27,30,35,.96),rgba(18,20,24,.96)); border:1px solid var(--edge); border-radius:10px; padding:22px; box-shadow:0 18px 45px rgba(0,0,0,.22); margin-bottom:16px; }
+    label { color:var(--muted); display:block; font-size:12px; margin-bottom:7px; } select { width:100%; background:#0d0f12; border:1px solid #383c43; border-radius:5px; padding:11px; color:var(--text); font:inherit; } select:focus { outline:1px solid var(--accent); border-color:var(--accent); }
+    p { line-height:1.55; } .muted { color:var(--muted); } .notice { border-left:3px solid var(--warning); padding:10px 12px; background:rgba(255,200,107,.07); color:#ffe1a5; font-size:13px; } .hidden { display:none; }
+    .wiring { width:100%; border-collapse:collapse; overflow:hidden; } .wiring th,.wiring td { text-align:left; padding:11px 9px; border-bottom:1px solid var(--edge); } .wiring th { color:var(--muted); font-size:12px; } .download { color:var(--accent); } code { color:#bfffe0; } button { border:1px solid var(--accent); background:var(--accent); color:#052217; padding:11px 16px; border-radius:5px; font:inherit; font-weight:700; cursor:pointer; } button:disabled { cursor:wait; opacity:.65; } .progress { height:8px; overflow:hidden; margin-top:18px; border:1px solid var(--edge); border-radius:5px; background:#0b0c0e; } .progress div { width:0; height:100%; background:var(--accent); transition:width .15s; } pre { max-height:220px; overflow:auto; white-space:pre-wrap; background:#0b0c0e; border:1px solid var(--edge); color:#bfffe0; margin-top:14px; padding:12px; border-radius:5px; font-size:12px; } esp-web-install-button { --esp-tools-button-color:var(--accent); --esp-tools-button-text-color:#052217; }
+    @media(max-width:620px) { main { margin:24px auto; } header { align-items:flex-start; flex-direction:column; } .wiring { font-size:12px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1>TKL Nova-X <span class="brand">FIRMWARE FLASHER</span></h1><span class="brand">Chrome or Edge required</span></header>
+    <section class="card">
+      <label for="board">Board</label>
+      <select id="board">
+        <option value="esp32-c5">ESP32-C5</option>
+        <option value="bw16">BW16</option>
+      </select>
+    </section>
+
+    <section id="esp32-c5" class="card">
+      <h2>Flash ESP32-C5</h2>
+      <p class="muted">Connect the board with a data-capable USB cable. Click the button, select the serial port, and keep the cable connected until the installer reports success.</p>
+      <esp-web-install-button manifest="./manifest-esp32-c5.json"></esp-web-install-button>
+      <p class="notice">If the board is not detected, enter its bootloader mode and try again. This installer erases and writes the complete 4 MB firmware image.</p>
+    </section>
+
+    <section id="bw16" class="card hidden">
+      <h2>BW16 firmware</h2>
+      <p class="muted">The BW16 uses the Realtek RTL8720DN UART bootloader, not the ESP32 protocol. Connect the board with a data-capable USB cable. The installer enters download mode, erases the required flash sectors, writes the fixed firmware, and restarts the board.</p>
+      <button id="flash-bw16">Connect and flash BW16</button>
+      <div class="progress" aria-label="BW16 flashing progress"><div id="bw16-progress"></div></div>
+      <p id="bw16-status" class="muted" role="status">Ready to connect.</p>
+      <pre id="bw16-log" class="hidden" aria-live="polite"></pre>
+      <p><a class="download" href="./firmware/bw16/bw16.bin" download>Download BW16 firmware</a></p>
+      <p class="notice">Flashing replaces the firmware currently stored on the BW16. Do not disconnect the USB cable until the installer reports success. Do not use the ESP32 installer for a BW16.</p>
+    </section>
+
+    <section class="card">
+      <h2>Fixed wiring</h2>
+      <table class="wiring"><thead><tr><th>Function</th><th>ESP32-C5</th><th>BW16</th></tr></thead><tbody>
+        <tr><td>Up</td><td>GPIO 24</td><td>D12 / PA12</td></tr>
+        <tr><td>Down</td><td>GPIO 23</td><td>D2 / PA27</td></tr>
+        <tr><td>OK</td><td>GPIO 28</td><td>D11 / PA13</td></tr>
+        <tr><td>Back</td><td>GPIO 10</td><td>D6 / PB3</td></tr>
+        <tr><td>Display SDA</td><td>GPIO 26</td><td>D8 / PA26</td></tr>
+        <tr><td>Display SCL</td><td>GPIO 25</td><td>D7 / PA25</td></tr>
+      </tbody></table>
+    </section>
+  </main>
+  <script>
+    const board = document.querySelector('#board');
+    const sections = { 'esp32-c5': document.querySelector('#esp32-c5'), bw16: document.querySelector('#bw16') };
+    board.addEventListener('change', () => Object.entries(sections).forEach(([name, element]) => element.classList.toggle('hidden', name !== board.value)));
+  </script>
+  <script type="module">
+    import { flashBw16 } from './bw16-flasher.js';
+    const button = document.querySelector('#flash-bw16');
+    const status = document.querySelector('#bw16-status');
+    const log = document.querySelector('#bw16-log');
+    const bar = document.querySelector('#bw16-progress');
+    const addLog = (message) => { log.classList.remove('hidden'); log.textContent += `${message}\n`; log.scrollTop = log.scrollHeight; };
+    const setProgress = (percent, message) => { bar.style.width = `${percent}%`; status.textContent = message; };
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      log.textContent = '';
+      try { await flashBw16({ log: addLog, progress: setProgress }); }
+      catch (error) { setProgress(0, `Flashing failed: ${error.message}`); addLog(`ERROR: ${error.message}`); }
+      finally { button.disabled = false; }
+    });
+  </script>
+</body>
+</html>
